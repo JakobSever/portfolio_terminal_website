@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	font-family: "monospace", monospace !important;
+	font-weight: 400;
+	font-style: normal;
+	font-size: 20px;
+	overflow: hidden;
+}
+
+.terminal {
+	background-color: #1a1a1a;
+	color: #f8f8f2;
+	padding-bottom: 0.2%
+}
+
+
+
+

@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# HTML5 Typescript Template
 
-## Getting Started
+[See live demo](https://darkeclipz.github.io/html5-typescript-template/)
 
-First, run the development server:
+## What is this?
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+This HTML5 Typescript Template is a very basic set up of a page, minimalistic CSS, and compiling Typescript with Webpack.
+
+The intention is to have a small base from which a project can be started, without the hassle of creating this boilerplate code everytime.
+
+|Light|Dark|
+|--|--|
+|![](example_light.jpeg)|![](example_dark.jpeg)|
+
+## How to use it?
+It has been set up to be used as easily as possible. Use the following steps to get started:
+
+  1. Clone it from Github with `git clone https://github.com/darkeclipz/html5-typescript-template`, or <a href="https://github.com/darkeclipz/html5-typescript-template/releases/download/v1.0.0/html5-typescript-template-v1.0.0.zip">download the release as a .zip</a>.
+  2. You need to have Node JS installed for npm.
+  3. Restore all the packages with `npm i --savedev`.
+  4. Compile it with `webpack`.
+
+## What does it include?
+This template already inclused the following things:
+
+  * Open Sans font from Google Fonts.
+  * A basic color palette created with coolors.co.
+  * Complete CSS reset.
+  * A basic 'holy grail' layout with flexbox.
+  * CSS overrides for dark mode.
+  * An empty CSS media query rule, to start with making everything responsive.
+  * Set up for Typescript with strict mode.
+  * Set up for Webpack to start building.
+
+It is supposed to be a very light boilerplate template, without any CSS framework,   or other UI/JS frameworks. These should be added yourself, if required.
+
+# How to: only setup TS/Webpack
+
+Steps required to recreate it. If Typescript `tsc` is not installed, this can be done with `npm i -g typescript`. If `npm` is not available, download Node JS.
+
+### 1. Create `tsconfig.json`.
+
+Creat a file `tsconfig.json` in the root directory of your project.
+Add the following lines:
+
+```json
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "allowJs": false,
+    "target": "es5",
+    "allowUnusedLabels": false,
+    "strict": true,
+    "sourceMap": true
+  },
+  "include": ["./src/**/*"]
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Or type `tsc --init` to create a new `tsconfig.json` file.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 2. Set up webpack & building
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Webpack dependencies can be installed with `npm install -savedev typescript webpack ts-loader source-map-loader`.
 
-## Learn More
+Then we create `webpack.config.js`, and paste:
 
-To learn more about Next.js, take a look at the following resources:
+```js
+module.exports = {
+  entry: "./src/index.ts",
+  output: {
+    filename: "./dist/bundle.js",
+  },
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+  // Enable sourcemaps for debugging webpack's output.
+  devtool: "source-map",
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+  resolve: {
+    // Add '.ts' and '.tsx' as resolvable extensions.
+    extensions: ["", ".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
+  },
 
-## Deploy on Vercel
+  module: {
+    rules: [
+      // All files with a '.ts' or '.tsx' extension will be handled by 'ts-loader'.
+      { test: /\.tsx?$/, loader: "ts-loader" },
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+      // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
+      { test: /\.js$/, loader: "source-map-loader" },
+    ],
+  },
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+  // Other options...
+};
+```
+
+Now we can build with `webpack`. To not have a minified source ouput, use
+
+```js
+optimization: {
+    minimize: false
+}
+```
+
+### 3. Other
+
+ * To have Typescript output a source map, add `"sourceMap": true`.
+
+For more information, see: https://www.typescriptlang.org/docs/handbook/migrating-from-javascript.html.
