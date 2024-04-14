@@ -6,6 +6,7 @@ interface MenuItem {
 export default class Terminal {
 	private terminalElement: HTMLElement;
 	private terminalContent: HTMLElement;
+	private terminalInput: HTMLElement;
 	private fontSize: number = 20;
 	private charHeight: number = this.fontSize * 1.2;
 	private charWidth: number = this.fontSize * 0.6;
@@ -41,11 +42,13 @@ export default class Terminal {
 		}
 
 		if(!this.terminalElement.querySelector('.terminal-prompt')) {
-			this.terminalElement.innerHTML += '<div class="terminal-prompt">guest@Jakob-Sever-Portfolio~ %: <span class="terminal-cursor"></span></div>';
+			this.terminalElement.innerHTML += '<div class="terminal-prompt">guest@Jakob-Sever-Portfolio~ %:&nbsp;<span class="terminal-input"></span><span class="terminal-cursor"></span></div>';
 		}
 
 		this.terminalContent = this.terminalElement.querySelector('.terminal-content') as HTMLElement;
+		this.terminalInput = this.terminalElement.querySelector('.terminal-input') as HTMLElement;
 
+	
 		this.init();
 	}
 
@@ -67,7 +70,6 @@ export default class Terminal {
 
 			Hello World!
 
-			I am a self-taught programmer motivated by passion and personal projects.
 
 				`;
 
@@ -77,6 +79,8 @@ export default class Terminal {
 		let screenText: string = "";
 		screenText += this.centerText(this.formatText(textToDisplay));
 
+		screenText += this.centerText('I am a self-taught programmer motivated by passion and personal projects.');
+  
 		screenText += this.centerText(this.formatText(this.getMenu()));
 
 		const lines = screenText.split('<br>').length;
@@ -85,19 +89,38 @@ export default class Terminal {
 		const allLines = Math.floor(window.innerHeight / this.charHeight);
 
 		const linesToAdd = Math.floor((allLines - lines) / 2);
-		this.drawText(screenText + '<br>'.repeat(linesToAdd));
+		if(linesToAdd > 0) {
+			screenText += '<br>'.repeat(linesToAdd);
+		}
+
+		this.drawText(screenText);
+
+
+		const menuItems = this.terminalContent.querySelectorAll('[data-menu]');
+		menuItems.forEach((item, index) => {
+			item.addEventListener('click', () => {
+				this.selectedMenuItem = index;
+				this.highlightMenuItem();
+				this.goToPage(this.menuItems[index].name);
+			});
+			item.addEventListener('mouseover', () => {
+				this.selectedMenuItem = index;
+				this.highlightMenuItem();
+			});
+		});
+
 	}
 
 	private formatText(text: string): string {
-		return text.replaceAll(' ', '&nbsp;').replaceAll('\n', '<br>');
+		return text.replaceAll(' ', '&nbsp;').replaceAll('\n', '<br>').replaceAll('span&nbsp;', 'span ')
 	}
 
 	private getMenu() {
-		let menu = "\n#----------------#\n";
+		let menu = "\n<nav>#----------------#\n";
 		this.menuItems.forEach((item, index) => {
-			menu += `|   ${this.selectedMenuItem === index ? ">" : " "} ${item.name}` + " ".repeat(7 - item.name.length) + `    |\n`;
+			menu += `<span data-menu="${index}">|   ${this.selectedMenuItem === index ? ">" : " "} ${item.name}` + " ".repeat(7 - item.name.length) + `    |\n</span>`;
 		});
-		menu += "#----------------#\n\n";
+		menu += "#----------------#</nav>\n\n";
 
 		return menu;
 	}
@@ -116,5 +139,51 @@ export default class Terminal {
 
 	private drawText(text: string) {
 		this.terminalContent.innerHTML += text;
+	}
+
+	private highlightMenuItem() {
+		const menuItems = this.terminalContent.querySelectorAll('[data-menu]');
+		menuItems.forEach((item, index) => {
+			if(index === this.selectedMenuItem) {
+				item.innerHTML = item.innerHTML.replace('&nbsp;&nbsp;' + this.menuItems[index].name, '&gt;&nbsp;' + this.menuItems[index].name);
+			} else {
+				item.innerHTML = item.innerHTML.replace('&gt;', '&nbsp;');
+			}
+		});
+	}
+
+	private clearTerminalInput() {
+		this.terminalInput.innerHTML = '';
+	}
+
+	private typeInTerminal(text: string) {
+		this.clearTerminalInput();
+		const textArray = text.split('');
+		let i = 0;
+		const interval = setInterval(() => {
+			if(i < textArray.length) {
+				this.terminalInput.innerHTML += textArray[i];
+				i++;
+			} else {
+				clearInterval(interval);
+			}
+		}, 50);
+	}
+
+	goToPage(page: string) {
+		this.typeInTerminal('cd ./' + page);
+		setTimeout(() => {
+		switch(page) {
+			case 'Home':
+				this.mainScreen();
+				break;
+			case 'Skills':
+				break;
+			case 'About':
+				break;
+			case 'CV':
+				break;
+		}
+		}, 1000);
 	}
 }
