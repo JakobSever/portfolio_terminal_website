@@ -14,30 +14,28 @@ export default class Terminal {
 	private terminalInput: HTMLElement;
 	private fontSize: number = 20;
 	private charHeight: number = this.fontSize * 1.2;
-	private charWidth: number = this.fontSize * 0.6;
-	private selectedMenuItem: number = 0;
 	private menuItems: MenuItem[] = [
 		{
 			name: "Skills",
-			fn: ()=>{ console.log('Skills'); }
+			fn: ()=>{ this.skillsScreen() }
 		},
 		{
 			name: "About",
-			fn: ()=>{ console.log('About'); }
+			fn: ()=>{ this.aboutScreen(); }
 		},
 		{
 			name: "Projects",
-			fn: ()=>{ console.log('Projects'); }
+			fn: ()=>{ this.projectsScreen(); }
 		},
 		{
 			name: "CV",
-			fn: ()=>{ console.log('CV'); }
+			fn: ()=>{ this.cvScreen(); }
 		}
 	];
 
 
 
-	constructor(terminalSelector: string) {
+	public constructor(terminalSelector: string) {
 		this.terminalElement = document.querySelector(terminalSelector) as HTMLElement;
 
 		if(!this.terminalElement) {
@@ -56,10 +54,6 @@ export default class Terminal {
 		this.terminalInput = this.terminalElement.querySelector('.terminal-input') as HTMLElement;
 
 	
-		this.init();
-	}
-
-	init() {
 		this.homeScreen();
 	}
 
@@ -67,36 +61,44 @@ export default class Terminal {
 		return text.replaceAll(' ', '&nbsp;').replaceAll('\n', '<br>').replaceAll('span&nbsp;', 'span ').replaceAll('div&nbsp;', 'div ')
 	}
 
-	private getMenu() {
-		let menu = "\n<nav>#----------------#\n";
+	private addMenu(): void {
+		this.addText("<nav>#----------------#");
 		this.menuItems.forEach((item, index) => {
-			menu += `<span data-menu="${index}">|   ${this.selectedMenuItem === index ? ">" : " "} ${item.name}` + " ".repeat(8 - item.name.length) + `    |\n</span>`;
+			this.addText(this.formatText(`<span data-menu="${index}">|   ${0 === index ? ">" : " "} ${item.name}` + " ".repeat(8 - item.name.length) + `   |\n</span>`));
 		});
-		menu += "#----------------#</nav>\n\n";
+		this.addText("#----------------#</nav>");
 
-		return menu;
-	}
 
-	private centerText(text: string): string {
-		return `<span class='text-center'>${text}</span>`;
-	}
-
-	private getCenterSpaces(text: string): number {
-		return Math.floor((window.innerWidth / this.charWidth - text.length) / 2 + 1); 
-	}
-
-	private clear() {
-		this.terminalContent.innerHTML = '';
-	}
-
-	private drawText(text: string) {
-		this.terminalContent.innerHTML += text;
-	}
-
-	private highlightMenuItem() {
 		const menuItems = this.terminalContent.querySelectorAll('[data-menu]');
 		menuItems.forEach((item, index) => {
-			if(index === this.selectedMenuItem) {
+			item.addEventListener('click', () => {
+				this.triggerMenuItem(index);
+			});
+
+			item.addEventListener('mouseover', () => {
+				this.highlightMenuItem(index);
+			});
+		});
+	}
+
+
+	private addBackButton(): void {
+		this.addText("<div class='back-button'>< Back</div>");
+		const backButton = this.terminalContent.querySelector('.back-button');
+		if(backButton) {
+			this.terminalContent.addEventListener('click', (event) => {
+				const target = event.target as HTMLElement;
+				if (target.classList.contains('back-button')) {
+					this.triggerMenuItem(-1);
+				}
+			});
+		}
+	}
+
+	private highlightMenuItem(selectedIndex: number): void {
+		const menuItems = this.terminalContent.querySelectorAll('[data-menu]');
+		menuItems.forEach((item, index) => {
+			if(index === selectedIndex) {
 				item.innerHTML = item.innerHTML.replace('&nbsp;&nbsp;' + this.menuItems[index].name, '&gt;&nbsp;' + this.menuItems[index].name);
 			} else {
 				item.innerHTML = item.innerHTML.replace('&gt;', '&nbsp;');
@@ -104,11 +106,16 @@ export default class Terminal {
 		});
 	}
 
-	private clearTerminalInput() {
+	private clear(): void {
+		this.terminalContent.innerHTML = '';
+	}
+
+
+	private clearTerminalInput(): void {
 		this.terminalInput.innerHTML = '';
 	}
 
-	private typeInTerminal(text: string) {
+	private typeInTerminal(text: string): void {
 		this.clearTerminalInput();
 		const textArray = text.split('');
 		let i = 0;
@@ -122,46 +129,45 @@ export default class Terminal {
 		}, 50);
 	}
 
-	goToPage(page: string) {
-		const cmd = page === "Home" ? 'cd ..' : 'cd ./' + page;
+	triggerMenuItem(pageIndex: number): void {
+		console.log(pageIndex);
+		const cmd = pageIndex === -1 ? 'cd ..' : ('cd ./' + this.menuItems[pageIndex].name);
 		this.typeInTerminal(cmd);
 		setTimeout(() => {
-		switch(page) {
-			case 'Home':
+			if(pageIndex === -1) {
 				this.homeScreen();
-				break;
-			case 'Skills':
-				this.skillsScreen();
-				break;
-			case 'About':
-				this.aboutScreen();
-				break;
-			case 'Projects':
-				this.projectsScreen();
-				break;
-			case 'CV':
-				this.cvScreen();
-				break;
-		}
-		this.addBackListener();
-		}, 50 * ('cd ./' + page).length);
+				return;
+			}
+			this.menuItems[pageIndex].fn();
+		}, 55 * (pageIndex === -1 ? 'cd ..' : 'cd ./' + this.menuItems[pageIndex].name).length);
 	}
 
-	addBackListener() {
-		const backButton = this.terminalContent.querySelector('#back-button');
-		if(backButton) {
-			backButton.addEventListener('click', () => {
-				this.goToPage("Home");
-			});
-		}
+
+	private addText(text: string): void {
+		this.terminalContent.innerHTML += `<div class="text-block">${text}</div>`;
 	}
 
-	getIcon(icon: string) {
-		return `<i class="fab fa-${icon}"></i>`;
+	private addSpace(): void {
+		this.terminalContent.innerHTML += '<br>';
 	}
 
-	homeScreen() {
+	colorText(text: string, color: string): string {
+		return `<span style="color:${color}">${text}</span>`;
+	}
+
+	addColumns(columns: string[]): void {
+		let text = '<div class="gap flex flex-row justify-center">';
+		columns.forEach(column => {
+			text += `<div class="text-left">${column}</div>`;
+		});
+		this.addText(text + "</div>");
+	}
+
+
+
+	homeScreen(): void {
 		this.clear();
+		
 		const textToDisplay: string = 
 			`#--------------------------------------#
 			|         _______                      |
@@ -171,54 +177,20 @@ export default class Terminal {
 			|  \\____//____/\\___/|___/\\___/_/       |
 			|                                      |
 			#--------------------------------------#
-
-			Hello World!
-
-
 				`;
 
-			
-
-
-		let screenText: string = "";
-		screenText += this.centerText(this.formatText(textToDisplay));
-
-		screenText += this.centerText('I am a self-taught programmer motivated by passion and personal projects.');
-  
-		screenText += this.centerText(this.formatText(this.getMenu()));
-
-		const lines = screenText.split('<br>').length;
-
-
-		const allLines = Math.floor(window.innerHeight / this.charHeight);
-
-		const linesToAdd = Math.floor((allLines - lines) / 2);
-		if(linesToAdd > 0) {
-			screenText += '<br>'.repeat(linesToAdd);
-		}
-
-		this.drawText(screenText);
-
-
-		const menuItems = this.terminalContent.querySelectorAll('[data-menu]');
-		menuItems.forEach((item, index) => {
-			if(this.menuItems[index].name !== "Home") {
-			item.addEventListener('click', () => {
-				this.selectedMenuItem = index;
-				this.highlightMenuItem();
-				this.goToPage(this.menuItems[index].name);
-			});
-			}
-			item.addEventListener('mouseover', () => {
-				this.selectedMenuItem = index;
-				this.highlightMenuItem();
-			});
-		});
-
+		this.addSpace();
+		this.addText(this.formatText(textToDisplay));
+		this.addSpace();
+		this.addText("Hello World!");	
+		this.addSpace();
+		this.addText("I am a self-taught programmer motivated by passion and personal projects.");
+		this.addSpace();
+ 		this.addMenu(); 
 	}
 
 
-	skillsScreen() {
+	skillsScreen(): void {
 		this.clear();
 
 		const textToDisplay: string = 
@@ -230,71 +202,40 @@ export default class Terminal {
 			| /____/_/ |_/___/_____/_____/____/    |
 			|                                      |
 			#--------------------------------------#
-
 					`;
 
-			
+		this.addBackButton();
+		this.addText(this.formatText(textToDisplay));
+		this.addSpace();
 
-
-		let screenText: string = "";
-
-		screenText += this.centerText(this.formatText("<span id='back-button'>< Back</span>"));
-
-		screenText += this.centerText(this.formatText(textToDisplay));
-
-
-		const leftColumn: string = this.formatText(`${this.colorText("FRONT-END:", "yellow")}	
+		const leftColumn: string = this.formatText(`* * * * * *
+${this.colorText("FRONT-END:", "yellow")}	
 HTML
 CSS
-		JavaScript
+JavaScript
 React
 Angular
 Flutter
 `);
-		const middleColumn: string = this.formatText(`${this.colorText("BACK-END:", "yellow")}
+		const middleColumn: string = this.formatText(`* * * * * *
+${this.colorText("BACK-END:", "yellow")}
 PHP
 SQL
 FireBase
-		Node.js
+Node.js
 `);
 
-const rightColumn: string = this.formatText(`${this.colorText("TOOLS:", "yellow")}
-											NeoVim
-											Tmux
+const rightColumn: string = this.formatText(`* * * * * *
+${this.colorText("TOOLS:", "yellow")}
+NeoVim
+Tmux
 Git
-		Next.js
+Next.js
 Smarty
 TypeScript
 `);
 
-
-		screenText += this.centerText(this.addColumns([leftColumn, middleColumn, rightColumn]));
-
-		const lines = screenText.split('<br>').length;
-
-
-		const allLines = Math.floor(window.innerHeight / this.charHeight);
-
-		const linesToAdd = Math.floor((allLines - lines) / 2) + 7;
-		if(linesToAdd > 0) {
-			screenText += '<br>'.repeat(linesToAdd);
-		}
-
-		this.drawText(screenText);
-
-
-	}
-
-	colorText(text: string, color: string) {
-		return `<span style="color:${color}">${text}</span>`;
-	}
-
-	addColumns(columns: string[]) {
-		let text = '<div class="gap flex flex-row justify-between">';
-		columns.forEach(column => {
-			text += `<div class="text-left">${column}</div>`;
-		});
-		return text + "</div>";
+		this.addColumns([leftColumn, middleColumn, rightColumn]);
 	}
 
 	projectsScreen() {
@@ -303,6 +244,79 @@ TypeScript
 
 	aboutScreen() {
 		this.clear();
+
+		const textToDisplay: string = 
+			`#--------------------------------------#
+			|      ___    ____  ____  __  ________ |
+			|     /   |  / __ )/ __ \\/ / / /_  __/ |
+			|    / /| | / __  / / / / / / / / /    |
+			|   / ___ |/ /_/ / /_/ / /_/ / / /     |
+			|  /_/  |_/_____/\\____/\\____/ /_/      |
+			|                                      |
+			#--------------------------------------#
+					`;
+
+			
+
+					this.addBackButton();
+					this.addText(this.formatText(textToDisplay));
+this.addSpace();
+this.addText("Hey, I'm Jakob Sever, the digital equivalent of a Swiss Army knife – I slice through frontend challenges with the finesse of a sushi chef and tackle backend tasks like a seasoned BBQ pitmaster. Whether it's HTML or Node.js, CSS or SQL, I've got the tools and the appetite for crafting web wonders. Let's code some magic together!");
+this.addSpace();
+		const pictureAscii = `
+		<div class="ascii-pic">
+
+		                                 */(&%&(*                                                           
+                             &@@&@%&@@&@&&@@&@/                                                     
+                          (@@&#%#&&##@@@&&&@@@&@@(                                                  
+                         @@@@%@(&@#&&#(@@@@@@@&&@@@%                                                
+                        @%#%@#&#&#&@#&&@&&%#/&&@@%@@@&                                              
+                       &&@&#@&&#&(&&%(@@@&%#######%#%%%%#&@@&.,,                                    
+                      *&@@%%&#@%%%##%##%%###%%%%#%%%%%%%%&&&&&&#&&&&&&&&(*                          
+                      &&&%%#&#%#%##%####%###%###/#####%%%%#&%#%%%#&&%&%%&&%%%@,                     
+                  ,&%%&%#%%#%(%#%##(,..,,,,,,,,,,,,..    (###%#%%%%%%%%&%(&&%%&%#,                  
+              /&%#&%&#&#&#%#(%#, ..,.,,**************,..    *#(%(%%&#%&%%%%%&&%#&&%%                
+           /&%%%##%%%#&##%##  ..,.....   .*(((((/*..    .     ,#(#%##%##%%((%&&&%#&%#*              
+        *&%&%##&#%#%##%%#    .,,...,,*///((//**((/**////*..   .,//((#%&%%%&%%%&%#%%%%&              
+      %%%&#%%%%#&#%%#/,     .,,*//***.    ,****//. *   */(/    *,//(#%%&&#%&#%#&#&%&%&.             
+    (%#&&%#%%#&#%##/#*     .,****,,*,,,,..*///(((#,,**/***//   ./(/(&(&%&##%%%%##%&&&&              
+   &%&#%#&#%#%%(&(*/,      ,////////////**((%%%#%%%(((((((/(.  *//%((#&&%#&#&(&(%##&%(              
+  &%&#&#%&#%#&#&/((,/     ./((((((((((((//#( (((( .###%###%%#  ,(*%#&&#&%%/&(%#%%%&&#               
+ &%&%&#&#%#%#%(#((*/      *(#########(((//*,       ,###%%%%%#  .#/#&(&(%%%%#&#&&%&&,                
+ %%%(&/%%#%%/%#%(#**. ****/###%%%#####,   .,*//(///,  ,#%%%#,,, *%(&/&%&&*%/%%/%#%                  
+@%&%(%(%#%#&(%#(#/(/.,,(*##%#%%%%%%#/*.,*,.*//////(*.,..%%###*/  #%%*#%#%#%%*%%%.                   
+/&#&#%#%%(#(&###((/.#/(,.,*%%%%%%%%##(/(###(,.  //#@@@@&@@@#*./../##(%#%%#(#%#*                     
+ /&&%#%#%#/&#(%#/%/*#* (%##/#%%%%%%%%#(**(((/*/#%%&@@@@&@@@&%*. .%&%#&/(%%&/                        
+  .%#&%##/#(/%%/#(#,/((..##,,%&&%%%%%/*/.**,/,/(//(#%###&@@ ,( . %#((%%%/                           
+    /%%&%(%#(%#//%(*,*(**..  %%&%&%%%/.,,..... .,.....**%& (..,/##%%(/                              
+      %&%%&#/#%#*/%(/*/(#**  %%%&%#%%#*.. .     .    ,(/#  */ ..&                                   
+          #%%%#%(#//%###(,*. #%%%%%%%####,..,.  .((((%&@@. ,.  /                                    
+               ,&&%%###%(#/ /(%%%%%%%#####((((((##%%&&&@@#**.                                       
+                        @&%%(#%%%%%%%##((///(((#%&%%&&&@@&////&                                     
+                             %%%#%%%%#((///((((#%%%%&&@@@@#, .@                                     
+                              &%%%&&%%((((#(((#####%&&&@@@/*/*                                      
+                             #/&#%%&%&%#((//(((#(##%%%&&@. , %                                      
+                          ##/,..&%%&&&%#(((((#(((#((#%#%,/,.,@@@%*                                  
+                          *,/,%/&%%%%%####(((((((((((#(,/,**&@@@@@@@(                               
+                       /%&@%@%*&&&%%%%#####((((((((((/*  *.(%%&&@@@@@@@@/                           
+                /@%%%&%&&&&@/,%&&%%#####((((((((((//**,    ##%%%&@&@@@@@@@@#                        
+           &&@&%&&&&&&&&@&@,./#%&%%#((((#(###((((///**//*/*#%@@@&@@@@@@&@@@@@@%                     
+        %&&@&&&&&&&&&&&@@@&/*#%%%&%#(((((##(##((((#%&(((*.&@&@@@@@@@@@@%@@&&@@@@@@/                 
+      (@%&&&&&&&&&&&&&&@@@@&((##%%#((((#######%%%%%%/(%((/&@@@@@@@@@@@&%&@@&&@@@@@@@@@#             
+     #@&&&&&&&&&&&@&@&&@@@@@&&&#/(((######%%%%%&&#%   ../#%%%#%#%%#%####( *,*/%&@@@@@@@@@(          
+    #@@&&&&&&&&&&&@@&@@&@&@&&&&%&&&%%%&&&&&&&&#%##.      %%%%###%#% ......(%%%%%&@@@@@@@@@@@@       
+   #@@&&&&&&&@@&&&@&&&&&@@@&&&&&&&&&%%%%%%&%%%%%##*///*/#%%%%#%(   .(.*%.%%%%%%%%#%&@@@@@@@@@@@#    
+   @@@&&&&&&&&&&&&&&&&&&&&&&&&&&&%&%%%%%&%%%%%###. ..,,*%%%*%..#%.#... &&&%%%%%#%%&&@@@@@@@@@@@@/   
+  &@@@@&&&&&&&@&&&&&&&&&&&&&&&&&&&&%%&&%%%%%%%%%. .   .#%..(. .#,/( /&%&&&%%%%%%%%%&&@@@@@@@@@@@@   
+ *@@@@@@&&&&&@&&&&&&&&&&&&&&&&&%&%%&&%%%%%%%%%%## ,***#..(#..*#%  .,.&%&&&./&%#%&%%##%&&@@@@@@@@@@  
+ @@@@@@@@@&@@&&@&&&&&&&&&&&&%&&&%%%%%&&&&%%%%%&,   %.,...#..,%&.&,. &&%&(/(&&%%%%%#%#%@@&&@@@@@@@@@ 
+/@@@@@&&@@@@&&&&@&&&&&&&&&&&&%&&&%%&&%%%%%%%./.%%&..,/.*(%*.(&..(. &%#*%%(&%&&&%#%%#%%%@&@&@@@@@@@@&
+&@@@@@&&@@@&&&&&&&@@&&&&&&&&&&&&&&&%&&&%%/../&..%./,**//.(,@& & & %&%.( ((%%%&&%%%%%%%%@@@@&&&@@@@@@
+
+		</div>`;
+
+		this.addText(this.formatText(pictureAscii));
+
 	}
 
 	cvScreen() {

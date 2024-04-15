@@ -15,7 +15,6 @@ body {
 	font-weight: 400;
 	font-style: normal;
 	font-size: 20px;
-	overflow: hidden;
 }
 
 .terminal {
@@ -26,8 +25,16 @@ body {
 	padding-bottom: 0.2%;
 	display: flex;
 	flex-direction: column;
-	justify-content: flex-end;
+	justify-content: flex-start;
 	align-items: flex-start;
+	padding-top: 50px
+}
+
+.terminal-content {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	flex: 1;
 }
 
 .terminal-prompt {
@@ -52,16 +59,21 @@ body {
 	margin-top: 2px;
 }
 
-.text-center {
+.text-block {
 	text-align: center;
+	max-width: 1000px;
+	padding: 0 10px;
 	align-self: center;
 }
 
-.terminal-content {
-	display: flex;
-	flex-direction: column;
-	width: 100%;
+.justify-center {
+	justify-content: center;
+}
 
+
+.text-center {
+	text-align: center;
+	align-self: center;
 }
 
 .text-left {
@@ -80,4 +92,13 @@ body {
 
 .gap {
 	gap: 100px;
+}
+
+.ascii-pic {
+font-size: 5px;
+line-height: 7px;
+}
+
+.mw-text {
+	max-width: 40%;
 }
