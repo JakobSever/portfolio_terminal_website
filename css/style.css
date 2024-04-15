@@ -11,7 +11,7 @@ body {
 	display: flex;
 	justify-content: start;
 	align-items: end;
-	font-family: "monospace", monospace !important;
+	font-family: "monospace", monospace;
 	font-weight: 400;
 	font-style: normal;
 	font-size: 20px;
@@ -62,4 +62,22 @@ body {
 	flex-direction: column;
 	width: 100%;
 
+}
+
+.text-left {
+	text-align: left;
+	align-self: flex-start;
+}
+
+.flex-row {
+	display: flex;
+	flex-direction: row;
+}
+
+.flex {
+	display: flex;
+}
+
+.gap {
+	gap: 100px;
 }
