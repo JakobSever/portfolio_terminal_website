@@ -8,6 +8,7 @@ export default class Terminal {
 	private terminalElement: HTMLElement;
 	private terminalContent: HTMLElement;
 	private terminalInput: HTMLElement;
+	private btnListenerAdded: boolean = false;
 	private menuItems: MenuItem[] = [
 		{
 			name: "Skills",
@@ -95,14 +96,17 @@ export default class Terminal {
 
 	private addBackButton(): void {
 		this.addText("<div class='back-button'>< Back</div>");
-		const backButton = this.terminalContent.querySelector('.back-button');
-		if(backButton) {
-			this.terminalContent.addEventListener('click', (event) => {
-				const target = event.target as HTMLElement;
-				if (target.classList.contains('back-button')) {
-					this.triggerMenuItem(-1);
-				}
-			}, {once : true});
+		if(!this.btnListenerAdded) {
+			const backButton = this.terminalContent.querySelector('.back-button');
+			if(backButton) {
+				this.terminalContent.addEventListener('click', (event) => {
+					const target = event.target as HTMLElement;
+					if (target.classList.contains('back-button')) {
+						this.triggerMenuItem(-1);
+					}
+				});
+			}
+			this.btnListenerAdded = true;
 		}
 	}
 
@@ -153,8 +157,8 @@ export default class Terminal {
 	}
 
 
-	private addText(text: string): void {
-		this.terminalContent.innerHTML += `<div class="text-block">${text}</div>`;
+	private addText(text: string, classes: string = ""): void {
+		this.terminalContent.innerHTML += `<div class="text-block ${classes}">${text}</div>`;
 	}
 
 	private addSpace(): void {
@@ -165,12 +169,12 @@ export default class Terminal {
 		return `<span style="color:${color}">${text}</span>`;
 	}
 
-	private addColumns(columns: string[]): void {
-		let text = '<div class="gap flex flex-row justify-center">';
+	private addColumns(columns: string[], classes: string = ""): void {
+		let text = `<div class="gap flex flex-row justify-center">`;
 		columns.forEach(column => {
 			text += `<div class="text-left">${column}</div>`;
 		});
-		this.addText(text + "</div>");
+		this.addText(text + "</div>", classes);
 	}
 
 	private textRight(text: string): string {
@@ -203,7 +207,7 @@ export default class Terminal {
 		const leftColumn = this.textLeft(Object.keys(infoObject).map(key => key).join('<br>'));
 		const rightColumn = this.textRight(Object.values(infoObject).join('<br>'));
 
-		this.addColumns([leftColumn, rightColumn]);
+		this.addColumns([leftColumn, rightColumn], "info-block-container");
 	}
 
 
@@ -226,7 +230,7 @@ export default class Terminal {
 		this.addSpace();
 		this.addText("Hello World!");	
 		this.addSpace();
-		this.addText("I am a self-taught programmer motivated by passion and personal projects.");
+		this.addText("I am a self-taught programmer motivated by passion and personal projects.", "force-center");
 		this.addSpace();
  		this.addMenu(); 
 	}
@@ -280,10 +284,6 @@ TypeScript
 `);
 
 		this.addColumns([leftColumn, middleColumn, rightColumn]);
-	}
-
-	private projectsScreen() {
-		this.clear();
 	}
 
 	private aboutScreen() {

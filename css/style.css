@@ -7,7 +7,8 @@
 
 body {
 	min-height: 100vh;
-	min-width: 100vw;
+	width: 100vw;
+	overflow-x: hidden;
 	display: flex;
 	justify-content: start;
 	align-items: end;
@@ -19,7 +20,7 @@ body {
 
 .terminal {
 	min-height: 100vh;
-	min-width: 100vw;
+	width: 100vw;
 	background-color: #1a1a1a;
 	color: #f8f8f2;
 	padding-bottom: 0.2%;
@@ -46,6 +47,7 @@ body {
 	right: 0;
 	padding-bottom: 10px;
 	padding-top: 10px;
+	padding-left: 10px;
 	background: rgb(26,26,26);
 	background: linear-gradient(0deg, rgba(26,26,26,0.9416141456582633) 0%, rgba(26,26,26,0) 100%);
 }
@@ -112,4 +114,36 @@ line-height: 7px;
 .horizontal-line {
 	border-bottom: 2px solid #f8f8f2;
 	width: 100%;
+}
+
+@media screen and (max-width: 600px) {
+	.terminal-prompt {
+		font-size: 14px;
+	}
+
+	body {
+		font-size: 14px;
+	}
+
+	.gap {
+		gap: 30px;
+	}
+
+	.text-block {
+		max-width: 360px;
+	}	
+
+	.text-block:not(.force-center) {
+		text-align: left;
+	}
+
+	.info-block,
+	.info-block > div {
+		width: 100%;
+		justify-content: space-between;
+	}
+
+	.terminal {
+		padding-top: 20px;
+	}
 }
