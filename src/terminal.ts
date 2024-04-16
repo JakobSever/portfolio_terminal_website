@@ -1,35 +1,43 @@
 interface MenuItem {
 	name: string;
+	cmd: string;
 	fn: () => void;
-}
-
-interface SkillItem {
-	name: string;
-	icon: string;
 }
 
 export default class Terminal {
 	private terminalElement: HTMLElement;
 	private terminalContent: HTMLElement;
 	private terminalInput: HTMLElement;
-	private fontSize: number = 20;
-	private charHeight: number = this.fontSize * 1.2;
 	private menuItems: MenuItem[] = [
 		{
 			name: "Skills",
+			cmd: "cd ./Skills",
 			fn: ()=>{ this.skillsScreen() }
 		},
 		{
 			name: "About",
+			cmd: "cd ./About",
 			fn: ()=>{ this.aboutScreen(); }
 		},
 		{
-			name: "Projects",
-			fn: ()=>{ this.projectsScreen(); }
+			name: "CV",
+			cmd: "cd ./CV",
+			fn: ()=>{ this.cvScreen(); }
 		},
 		{
-			name: "CV",
-			fn: ()=>{ this.cvScreen(); }
+			name: " ",
+			cmd: "",
+			fn: ()=>{ }
+		},
+		{ 
+			name: "LinkedIn",
+			cmd: "open LinkedIn",
+			fn: ()=>{ window.open('https://www.linkedin.com/in/jakob-sever-954051293/', '_blank'); }
+		},
+		{
+			name: "GitHub",
+			cmd: "open GitHub",
+			fn: ()=>{ window.open('https://github.com/JakobSever', '_blank'); }
 		}
 	];
 
@@ -53,12 +61,15 @@ export default class Terminal {
 		this.terminalContent = this.terminalElement.querySelector('.terminal-content') as HTMLElement;
 		this.terminalInput = this.terminalElement.querySelector('.terminal-input') as HTMLElement;
 
-	
-		this.homeScreen();
+		this.homeScreen();	
 	}
 
 	private formatText(text: string): string {
-		return text.replaceAll(' ', '&nbsp;').replaceAll('\n', '<br>').replaceAll('span&nbsp;', 'span ').replaceAll('div&nbsp;', 'div ')
+		return this.formatNewLines(text).replaceAll(' ', '&nbsp;').replaceAll('span&nbsp;', 'span ').replaceAll('div&nbsp;', 'div ')
+	}
+
+	private formatNewLines(text: string): string {
+		return text.replaceAll('\n', '<br>');
 	}
 
 	private addMenu(): void {
@@ -91,7 +102,7 @@ export default class Terminal {
 				if (target.classList.contains('back-button')) {
 					this.triggerMenuItem(-1);
 				}
-			});
+			}, {once : true});
 		}
 	}
 
@@ -130,8 +141,7 @@ export default class Terminal {
 	}
 
 	triggerMenuItem(pageIndex: number): void {
-		console.log(pageIndex);
-		const cmd = pageIndex === -1 ? 'cd ..' : ('cd ./' + this.menuItems[pageIndex].name);
+		const cmd = pageIndex === -1 ? 'cd ..' : (this.menuItems[pageIndex].cmd);
 		this.typeInTerminal(cmd);
 		setTimeout(() => {
 			if(pageIndex === -1) {
@@ -139,7 +149,7 @@ export default class Terminal {
 				return;
 			}
 			this.menuItems[pageIndex].fn();
-		}, 55 * (pageIndex === -1 ? 'cd ..' : 'cd ./' + this.menuItems[pageIndex].name).length);
+		}, 55 * (pageIndex === -1 ? 'cd ..'.length : this.menuItems[pageIndex].cmd.length));
 	}
 
 
@@ -148,14 +158,14 @@ export default class Terminal {
 	}
 
 	private addSpace(): void {
-		this.terminalContent.innerHTML += '<br>';
+		this.terminalContent.innerHTML += '&nbsp;<br>';
 	}
 
-	colorText(text: string, color: string): string {
+	private colorText(text: string, color: string): string {
 		return `<span style="color:${color}">${text}</span>`;
 	}
 
-	addColumns(columns: string[]): void {
+	private addColumns(columns: string[]): void {
 		let text = '<div class="gap flex flex-row justify-center">';
 		columns.forEach(column => {
 			text += `<div class="text-left">${column}</div>`;
@@ -163,11 +173,43 @@ export default class Terminal {
 		this.addText(text + "</div>");
 	}
 
+	private textRight(text: string): string {
+		return `<div class="text-right">${text}</div>`;
+	}
+
+	private textLeft(text: string): string {
+		return `<div class="text-left">${text}</div>`;
+	}
+
+	private calculateAge(birthDate: Date): number {
+		const currentDate = new Date();
+		const birthYear = birthDate.getFullYear();
+		const birthMonth = birthDate.getMonth();
+		const birthDay = birthDate.getDate();
+		const currentYear = currentDate.getFullYear();
+		const currentMonth = currentDate.getMonth();
+		const currentDay = currentDate.getDate();
+
+		let age = currentYear - birthYear;
+
+		if (currentMonth < birthMonth || (currentMonth === birthMonth && currentDay < birthDay)) {
+			age--;
+		}
+
+		return age;
+	}
+
+	private addInfoBlock(infoObject: Object): void {
+		const leftColumn = this.textLeft(Object.keys(infoObject).map(key => key).join('<br>'));
+		const rightColumn = this.textRight(Object.values(infoObject).join('<br>'));
+
+		this.addColumns([leftColumn, rightColumn]);
+	}
 
 
-	homeScreen(): void {
+	private homeScreen(): void {
 		this.clear();
-		
+
 		const textToDisplay: string = 
 			`#--------------------------------------#
 			|         _______                      |
@@ -190,7 +232,7 @@ export default class Terminal {
 	}
 
 
-	skillsScreen(): void {
+	private skillsScreen(): void {
 		this.clear();
 
 		const textToDisplay: string = 
@@ -208,7 +250,7 @@ export default class Terminal {
 		this.addText(this.formatText(textToDisplay));
 		this.addSpace();
 
-		const leftColumn: string = this.formatText(`* * * * * *
+		const leftColumn: string = this.formatNewLines(`* * * * * *
 ${this.colorText("FRONT-END:", "yellow")}	
 HTML
 CSS
@@ -217,7 +259,7 @@ React
 Angular
 Flutter
 `);
-		const middleColumn: string = this.formatText(`* * * * * *
+		const middleColumn: string = this.formatNewLines(`* * * * * *
 ${this.colorText("BACK-END:", "yellow")}
 PHP
 SQL
@@ -225,11 +267,13 @@ FireBase
 Node.js
 `);
 
-const rightColumn: string = this.formatText(`* * * * * *
+const rightColumn: string = this.formatNewLines(`* * * * * *
 ${this.colorText("TOOLS:", "yellow")}
 NeoVim
 Tmux
 Git
+
+${this.colorText("OTHER:", "yellow")}
 Next.js
 Smarty
 TypeScript
@@ -238,11 +282,11 @@ TypeScript
 		this.addColumns([leftColumn, middleColumn, rightColumn]);
 	}
 
-	projectsScreen() {
+	private projectsScreen() {
 		this.clear();
 	}
 
-	aboutScreen() {
+	private aboutScreen() {
 		this.clear();
 
 		const textToDisplay: string = 
@@ -261,7 +305,7 @@ TypeScript
 					this.addBackButton();
 					this.addText(this.formatText(textToDisplay));
 this.addSpace();
-this.addText("Hey, I'm Jakob Sever, the digital equivalent of a Swiss Army knife – I slice through frontend challenges with the finesse of a sushi chef and tackle backend tasks like a seasoned BBQ pitmaster. Whether it's HTML or Node.js, CSS or SQL, I've got the tools and the appetite for crafting web wonders. Let's code some magic together!");
+this.addText("Hey, I'm Jakob Sever, the digital equivalent of a Swiss Army knife – I slice through frontend challenges with the finesse of a sushi chef and tackle backend tasks like a seasoned BBQ pitmaster. Whether it's PHP or Node.js, HTML or React, I've got the tools and the appetite for crafting web wonders. Let's code some magic together!");
 this.addSpace();
 		const pictureAscii = `
 		<div class="ascii-pic">
@@ -319,70 +363,63 @@ this.addSpace();
 
 	}
 
-	cvScreen() {
+	private cvScreen() {
 		this.clear();
+
+		const textToDisplay: string = 
+			`#--------------------------------------#
+			|               _______    __          | 
+			|              / ____/ |  / /          | 
+			|             / /    | | / /           | 
+			|            / /___  | |/ /            | 
+			|            \\____/  |___/             |
+			|                                      |
+			#--------------------------------------#
+`;
+
+		this.addBackButton();
+		this.addText(this.formatText(textToDisplay));
+		this.addSpace();
+		this.addInfoBlock({
+			"Name": "Jakob Sever",
+			"Age": this.calculateAge(new Date(1995, 11, 16)).toString(),
+			"Location": "Koper, Slovenia",
+			"Email": "jakob1.sever@gmail.com",
+		});
+		this.addSpace();
+		this.addSpace();
+		this.addText("As a budding full stack developer, I'm fueled by my passion for learning and my relentless drive for growth. My insatiable thirst for knowledge constantly propels me to seek out new opportunities for learning and skill development. (The programmer's curse).");
+
+		this.addSpace();
+		this.addSpace();
+		this.addText(this.colorText("Work experience", "yellow"));
+		
+		this.addText(this.textLeft(this.formatNewLines(`
+
+		<div class="horizontal-line"></div>
+
+		Apr 2024 - present
+		${this.colorText("Software engineer, Tronius Gaming", "lightseagreen")}
+		${this.colorText("Node.js, Angular, React, Typescript, Phaser", "lightslategray")}
+
+		- Development and maintenance of applications
+		- Game development in Phaser framework
+
+		
+		<div class="horizontal-line"></div>
+
+		Oct 2020 - Apr 2024
+		${this.colorText("Full-stack developer, NGN MEDIA", "lightseagreen")}
+		${this.colorText("PHP, SQL, JavaScript, HTML, CSS, Smarty, Flutter, Firebase", "lightslategray")}
+
+		- Development, optimization, and maintenance of websites and applications 
+		- Development of custom CMS and CRM systems
+		- Mobile applications in Flutter environment
+		- PHP, SQL, JavaScript, HTML, CSS, Flutter, Smarty
+		`)));
+	
+
+		this.addSpace();
 	}
 
 }
-
-
-/*
-
-
-    __________  ____  _   ________    _______   ______ 
-   / ____/ __ \/ __ \/ | / /_  __/   / ____/ | / / __ \
-  / /_  / /_/ / / / /  |/ / / /_____/ __/ /  |/ / / / /
- / __/ / _, _/ /_/ / /|  / / /_____/ /___/ /|  / /_/ / 
-/_/   /_/ |_|\____/_/ |_/ /_/     /_____/_/ |_/_____/  
-
-
-
-
-
-    ____  ___   ________ __      _______   ______ 
-   / __ )/   | / ____/ //_/     / ____/ | / / __ \
-  / __  / /| |/ /   / ,< ______/ __/ /  |/ / / / /
- / /_/ / ___ / /___/ /| /_____/ /___/ /|  / /_/ / 
-/_____/_/  |_\____/_/ |_|    /_____/_/ |_/_____/  
-
-
-
-
-    ____  ___  _________    ____  ___   _____ ______
-   / __ \/   |/_  __/   |  / __ )/   | / ___// ____/
-  / / / / /| | / / / /| | / __  / /| | \__ \/ __/   
- / /_/ / ___ |/ / / ___ |/ /_/ / ___ |___/ / /___   
-/_____/_/  |_/_/ /_/  |_/_____/_/  |_/____/_____/   
-
-
-
-
-
-   _____ __ __ ______    __   _____
-  / ___// //_//  _/ /   / /  / ___/
-  \__ \/ ,<   / // /   / /   \__ \ 
- ___/ / /| |_/ // /___/ /______/ / 
-/____/_/ |_/___/_____/_____/____/  
-                                   
-
-
-
-    ___    ____  ____  __  ________
-   /   |  / __ )/ __ \/ / / /_  __/
-  / /| | / __  / / / / / / / / /   
- / ___ |/ /_/ / /_/ / /_/ / / /    
-/_/  |_/_____/\____/\____/ /_/     
-                                   
-
-
-
-
-   ____  ________  ____________ 
-  / __ \/_  __/ / / / ____/ __ \
- / / / / / / / /_/ / __/ / /_/ /
-/ /_/ / / / / __  / /___/ _, _/ 
-\____/ /_/ /_/ /_/_____/_/ |_|  
-
-
-
-*/

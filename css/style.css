@@ -35,10 +35,19 @@ body {
 	flex-direction: column;
 	width: 100%;
 	flex: 1;
+	padding-bottom: 30px;
 }
 
 .terminal-prompt {
 	display: flex;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding-bottom: 10px;
+	padding-top: 10px;
+	background: rgb(26,26,26);
+	background: linear-gradient(0deg, rgba(26,26,26,0.9416141456582633) 0%, rgba(26,26,26,0) 100%);
 }
 
 @keyframes terminal-cursor-animation {
@@ -70,15 +79,12 @@ body {
 	justify-content: center;
 }
 
-
-.text-center {
-	text-align: center;
-	align-self: center;
+.text-right {
+	text-align: right;
 }
 
 .text-left {
 	text-align: left;
-	align-self: flex-start;
 }
 
 .flex-row {
@@ -101,4 +107,9 @@ line-height: 7px;
 
 .mw-text {
 	max-width: 40%;
+}
+
+.horizontal-line {
+	border-bottom: 2px solid #f8f8f2;
+	width: 100%;
 }
