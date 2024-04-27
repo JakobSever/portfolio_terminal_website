@@ -146,4 +146,11 @@ line-height: 7px;
 	.terminal {
 		padding-top: 20px;
 	}
+
+	.terminal-cursor {
+		width: 8px;
+		height: 14px;
+		margin-top: 1px;
+		margin-left: 2px;
+	}
 }

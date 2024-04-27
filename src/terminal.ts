@@ -279,8 +279,9 @@ Git
 
 ${this.colorText("OTHER:", "yellow")}
 Next.js
-Smarty
 TypeScript
+Phaser
+Smarty
 `);
 
 		this.addColumns([leftColumn, middleColumn, rightColumn]);
@@ -403,7 +404,7 @@ this.addSpace();
 		${this.colorText("Node.js, Angular, React, Typescript, Phaser", "lightslategray")}
 
 		- Development and maintenance of applications
-		- Game development in Phaser framework
+		- Game development
 
 		
 		<div class="horizontal-line"></div>
@@ -415,7 +416,6 @@ this.addSpace();
 		- Development, optimization, and maintenance of websites and applications 
 		- Development of custom CMS and CRM systems
 		- Mobile applications in Flutter environment
-		- PHP, SQL, JavaScript, HTML, CSS, Flutter, Smarty
 		`)));
 	
 
